@@ -262,7 +262,12 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.opengles.version=196609
 
 PRODUCT_PROPERTY_OVERRIDES += \
+<<<<<<< HEAD
     ro.sf.lcd_density=420
+=======
+    ro.sf.lcd_density=480 \
+    ro.du.updater=bullhead 
+>>>>>>> 90f7ce4... Set DPI to 480 (stock)
 
 PRODUCT_PROPERTY_OVERRIDES += \
     persist.hwc.mdpcomp.enable=true
