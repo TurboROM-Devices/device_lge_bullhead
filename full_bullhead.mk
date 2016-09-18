@@ -30,6 +30,7 @@ PRODUCT_BRAND := google
 PRODUCT_MODEL := Nexus 5X
 PRODUCT_MANUFACTURER := LGE
 PRODUCT_RESTRICT_VENDOR_FILES := true
+PRODUCT_COPY_FILES += device/lge/bullhead/fstab.aosp_bullhead:root/fstab.bullhead
 
 # Inherit from bullhead device
 $(call inherit-product, device/lge/bullhead/device.mk)

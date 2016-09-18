@@ -19,15 +19,24 @@
 #
 # Everything in this directory will become public
 
+# Enable support for chinook sensorhub
+TARGET_USES_CHINOOK_SENSORHUB := false
 
 PRODUCT_COPY_FILES += \
     device/lge/bullhead/init.bullhead.rc:root/init.bullhead.rc \
     device/lge/bullhead/init.bullhead.usb.rc:root/init.bullhead.usb.rc \
     device/lge/bullhead/fstab.bullhead:root/fstab.bullhead \
     device/lge/bullhead/ueventd.bullhead.rc:root/ueventd.bullhead.rc \
-    device/lge/bullhead/init.bullhead.sensorhub.rc:root/init.bullhead.sensorhub.rc \
     device/lge/bullhead/init.bullhead.ramdump.rc:root/init.bullhead.ramdump.rc \
     device/lge/bullhead/init.bullhead.fp.rc:root/init.bullhead.fp.rc
+
+ifeq ($(TARGET_USES_CHINOOK_SENSORHUB),true)
+PRODUCT_COPY_FILES += \
+    device/lge/bullhead/init.bullhead.sensorhub.rc:root/init.bullhead.sensorhub.rc
+else
+PRODUCT_COPY_FILES += \
+    device/lge/bullhead/init.bullhead.nanohub.rc:root/init.bullhead.sensorhub.rc
+endif
 
 PRODUCT_COPY_FILES += \
     frameworks/av/media/libstagefright/data/media_codecs_google_audio.xml:system/etc/media_codecs_google_audio.xml \
@@ -39,10 +48,15 @@ PRODUCT_COPY_FILES += \
 
 # Audio
 PRODUCT_COPY_FILES += \
-    device/lge/bullhead/audio_policy.conf:system/etc/audio_policy.conf \
     device/lge/bullhead/audio_effects.conf:system/etc/audio_effects.conf \
     device/lge/bullhead/mixer_paths.xml:system/etc/mixer_paths.xml \
-    device/lge/bullhead/audio_platform_info.xml:system/etc/audio_platform_info.xml
+    device/lge/bullhead/audio_platform_info.xml:system/etc/audio_platform_info.xml \
+    device/lge/bullhead/audio_policy_configuration.xml:system/etc/audio_policy_configuration.xml \
+    device/lge/bullhead/audio_policy_volumes_drc.xml:system/etc/audio_policy_volumes_drc.xml \
+    frameworks/av/services/audiopolicy/config/a2dp_audio_policy_configuration.xml:system/etc/a2dp_audio_policy_configuration.xml \
+    frameworks/av/services/audiopolicy/config/r_submix_audio_policy_configuration.xml:system/etc/r_submix_audio_policy_configuration.xml \
+    frameworks/av/services/audiopolicy/config/usb_audio_policy_configuration.xml:system/etc/usb_audio_policy_configuration.xml \
+    frameworks/av/services/audiopolicy/config/default_volume_tables.xml:system/etc/default_volume_tables.xml \
 
 #Sound Trigger
 PRODUCT_COPY_FILES += \
@@ -91,9 +105,14 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.telephony.gsm.xml:system/etc/permissions/android.hardware.telephony.gsm.xml \
     frameworks/native/data/etc/android.hardware.nfc.xml:system/etc/permissions/android.hardware.nfc.xml \
     frameworks/native/data/etc/android.hardware.nfc.hce.xml:system/etc/permissions/android.hardware.nfc.hce.xml \
+    frameworks/native/data/etc/android.hardware.nfc.hcef.xml:system/etc/permissions/android.hardware.nfc.hcef.xml \
     frameworks/native/data/etc/android.hardware.ethernet.xml:system/etc/permissions/android.hardware.ethernet.xml \
     frameworks/native/data/etc/android.software.midi.xml:system/etc/permissions/android.software.midi.xml \
-    frameworks/native/data/etc/com.nxp.mifare.xml:system/etc/permissions/com.nxp.mifare.xml
+    frameworks/native/data/etc/android.software.verified_boot.xml:system/etc/permissions/android.software.verified_boot.xml \
+    frameworks/native/data/etc/com.nxp.mifare.xml:system/etc/permissions/com.nxp.mifare.xml \
+    frameworks/native/data/etc/android.hardware.opengles.aep.xml:system/etc/permissions/android.hardware.opengles.aep.xml \
+    frameworks/native/data/etc/android.hardware.vulkan.level-0.xml:system/etc/permissions/android.hardware.vulkan.level.xml \
+    frameworks/native/data/etc/android.hardware.vulkan.version-1_0_3.xml:system/etc/permissions/android.hardware.vulkan.version.xml
 
 # For SPN display
 PRODUCT_COPY_FILES += \
@@ -127,6 +146,10 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     device/lge/bullhead/init.bullhead.sh:system/bin/init.bullhead.sh
 
+# Qseecomd configuration file
+PRODUCT_COPY_FILES += \
+    device/lge/bullhead/init.bullhead.qseecomd.sh:system/bin/init.bullhead.qseecomd.sh
+
 PRODUCT_TAGS += dalvik.gc.type-precise
 
 PRODUCT_AAPT_CONFIG := normal
@@ -153,6 +176,7 @@ PRODUCT_PACKAGES += \
     libOmxVenc
 
 # Audio HAL and utilities
+USE_XML_AUDIO_POLICY_CONF := 1
 PRODUCT_PACKAGES += \
     audio.primary.msm8992 \
     audio.a2dp.default \
@@ -190,7 +214,6 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     libwpa_client \
     hostapd \
-    dhcpcd.conf \
     wpa_supplicant \
     wpa_supplicant.conf
 
@@ -212,10 +235,29 @@ PRODUCT_PACKAGES += \
     mm-qcamera-app
 
 # Sensor & activity_recognition HAL
+TARGET_USES_NANOHUB_SENSORHAL := true
+NANOHUB_SENSORHAL_LID_STATE_ENABLED := true
+NANOHUB_SENSORHAL_SENSORLIST := $(LOCAL_PATH)/sensorhal/sensorlist.cpp
+
 PRODUCT_PACKAGES += \
     sensors.bullhead \
     activity_recognition.bullhead \
+    context_hub.default
+
+ifeq ($(TARGET_USES_CHINOOK_SENSORHUB),true)
+PRODUCT_PACKAGES += \
     sensortool.bullhead
+else
+PRODUCT_PACKAGES += \
+    nanoapp_cmd
+endif
+
+# sensor utilities (only for userdebug and eng builds)
+ifneq (,$(filter userdebug eng, $(TARGET_BUILD_VARIANT)))
+PRODUCT_PACKAGES += \
+    nanotool \
+    sensortest
+endif
 
 PRODUCT_PACKAGES += \
     keystore.msm8992 \
@@ -255,7 +297,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
     wifi.supplicant_scan_interval=15
 
 PRODUCT_PROPERTY_OVERRIDES += \
-    ro.opengles.version=196609
+    ro.opengles.version=196610
 
 PRODUCT_PROPERTY_OVERRIDES += \
     ro.sf.lcd_density=480
@@ -375,7 +417,8 @@ PRODUCT_DEFAULT_PROPERTY_OVERRIDES += \
 
 # limit dex2oat threads to improve thermals
 PRODUCT_PROPERTY_OVERRIDES += \
-    dalvik.vm.dex2oat-threads=2 \
+    dalvik.vm.boot-dex2oat-threads=4 \
+    dalvik.vm.dex2oat-threads=4 \
     dalvik.vm.image-dex2oat-threads=4
 
 # Disable Camera TNR
@@ -404,22 +447,45 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # Power HAL
 PRODUCT_PACKAGES += \
-    power.bullhead
+    power.bullhead \
+    thermal.bullhead
 
 # old-apns.conf
 PRODUCT_COPY_FILES += \
     device/lge/bullhead/old-apns-conf.xml:system/etc/old-apns-conf.xml
 
-# Modem debugger
+# Modem debugger/misc
 ifneq (,$(filter userdebug eng, $(TARGET_BUILD_VARIANT)))
 PRODUCT_PACKAGES += \
     QXDMLogger
 
 PRODUCT_COPY_FILES += \
-    device/lge/bullhead/init.bullhead.diag.rc.userdebug:root/init.bullhead.diag.rc
+    device/lge/bullhead/init.bullhead.diag.rc.userdebug:root/init.bullhead.diag.rc \
+    device/lge/bullhead/init.bullhead.misc.rc.userdebug:root/init.bullhead.misc.rc
 else
 PRODUCT_COPY_FILES += \
-    device/lge/bullhead/init.bullhead.diag.rc.user:root/init.bullhead.diag.rc
+    device/lge/bullhead/init.bullhead.diag.rc.user:root/init.bullhead.diag.rc \
+    device/lge/bullhead/init.bullhead.misc.rc.user:root/init.bullhead.misc.rc
+endif
+
+# setup dm-verity configs.
+PRODUCT_SYSTEM_VERITY_PARTITION := /dev/block/platform/soc.0/f9824900.sdhci/by-name/system
+PRODUCT_VENDOR_VERITY_PARTITION := /dev/block/platform/soc.0/f9824900.sdhci/by-name/vendor
+$(call inherit-product, build/target/product/verity.mk)
+
+# OEM Unlock reporting
+ADDITIONAL_DEFAULT_PROPERTIES += \
+    ro.oem_unlock_supported=1
+
+# In userdebug, add minidebug info the the boot image and the system server to support
+# diagnosing native crashes.
+ifneq (,$(filter userdebug, $(TARGET_BUILD_VARIANT)))
+    # Boot image.
+    PRODUCT_DEX_PREOPT_BOOT_FLAGS += --generate-mini-debug-info
+    # System server and some of its services.
+    # Note: we cannot use PRODUCT_SYSTEM_SERVER_JARS, as it has not been expanded at this point.
+    $(call add-product-dex-preopt-module-config,services,--generate-mini-debug-info)
+    $(call add-product-dex-preopt-module-config,wifi-service,--generate-mini-debug-info)
 endif
 
 # setup dalvik vm configs.
