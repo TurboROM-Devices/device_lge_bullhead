@@ -35,4 +35,4 @@ PRODUCT_COPY_FILES += device/lge/bullhead/fstab.aosp_bullhead:root/fstab.bullhea
 # Inherit from bullhead device
 $(call inherit-product, device/lge/bullhead/device.mk)
 
-$(call inherit-product-if-exists, vendor/lge/bullhead/bullhead-vendor.mk)
+$(call inherit-product-if-exists, vendor/lge/bullhead/device-vendor.mk)
