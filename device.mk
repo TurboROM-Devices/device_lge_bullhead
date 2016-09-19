@@ -208,6 +208,7 @@ PRODUCT_PACKAGES += \
 
 # Fingerprint Sensor
 PRODUCT_PACKAGES += \
+    fingerprintd \
     fingerprint.bullhead
 
 # Wi-Fi
@@ -270,6 +271,14 @@ PRODUCT_PACKAGES += \
 DEVICE_PACKAGE_OVERLAYS := \
     device/lge/bullhead/overlay
 
+# Allow tethering without provisioning app
+PRODUCT_PROPERTY_OVERRIDES += \
+    net.tethering.noprovisioning=true
+
+# Mobile Data provision prop
+PRODUCT_PROPERTY_OVERRIDES += \
+    ro.com.android.prov_mobiledata=false
+
 # Enable AAC 5.1 output
 PRODUCT_PROPERTY_OVERRIDES += \
     media.aac_51_output_enabled=true
@@ -331,7 +340,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 # for perfd
 PRODUCT_PROPERTY_OVERRIDES += \
-    ro.min_freq_0=384000
+    ro.min_freq_0=384000 \
     ro.min_freq_4=384000
 
 PRODUCT_PROPERTY_OVERRIDES += \
@@ -450,9 +459,17 @@ PRODUCT_PACKAGES += \
     power.bullhead \
     thermal.bullhead
 
+
 # old-apns.conf
 PRODUCT_COPY_FILES += \
     device/lge/bullhead/old-apns-conf.xml:system/etc/old-apns-conf.xml
+
+# Enable camera EIS
+# eis.enable: enables electronic image stabilization
+# is_type: sets image stabilization type
+PRODUCT_PROPERTY_OVERRIDES += \
+    persist.camera.eis.enable=1 \
+    persist.camera.is_type=4
 
 # Modem debugger/misc
 ifneq (,$(filter userdebug eng, $(TARGET_BUILD_VARIANT)))
@@ -467,11 +484,6 @@ PRODUCT_COPY_FILES += \
     device/lge/bullhead/init.bullhead.diag.rc.user:root/init.bullhead.diag.rc \
     device/lge/bullhead/init.bullhead.misc.rc.user:root/init.bullhead.misc.rc
 endif
-
-# setup dm-verity configs.
-PRODUCT_SYSTEM_VERITY_PARTITION := /dev/block/platform/soc.0/f9824900.sdhci/by-name/system
-PRODUCT_VENDOR_VERITY_PARTITION := /dev/block/platform/soc.0/f9824900.sdhci/by-name/vendor
-$(call inherit-product, build/target/product/verity.mk)
 
 # OEM Unlock reporting
 ADDITIONAL_DEFAULT_PROPERTIES += \
@@ -502,3 +514,4 @@ PRODUCT_PROPERTY_OVERRIDES += \
 
 $(call inherit-product-if-exists, hardware/qcom/msm8994/msm8992.mk)
 $(call inherit-product-if-exists, vendor/qcom/gpu/msm8994/msm8994-gpu-vendor.mk)
+

@@ -83,9 +83,6 @@ on early-boot
     write /sys/module/pil_msa/parameters/modem_auth_timeout_ms ${persist.sys.modem_auth_timeout}
     write /sys/module/peripheral_loader/parameters/proxy_timeout_ms ${persist.sys.pil_proxy_timeout}
 
-    # Update dm-verity state and set partition.*.verified properties
-    verity_update_state
-
 on boot
     # execute script to set initial CPU settings
     # don't run as a service to avoid race conditions
@@ -264,7 +261,7 @@ on property:wc_transport.start_hci=false
 # QMUX must be in multiple groups to support external process connections
 service qmuxd /system/bin/qmuxd
     class main
-    user radio
+    user root
     group radio audio bluetooth wakelock gps
 
 service perfd /system/bin/perfd
@@ -429,7 +426,7 @@ service bullhead-sh /system/bin/init.bullhead.sh
     oneshot
 
 # bugreport is triggered by holding down volume down, volume up and power
-#service bugreport /system/bin/dumpstate -d -p -B \
+# service bugreport /system/bin/dumpstate -d -p -B \
 #        -o /data/data/com.android.shell/files/bugreports/bugreport
 #    class main
 #    disabled
