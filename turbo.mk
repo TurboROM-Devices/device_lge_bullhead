@@ -15,7 +15,7 @@ PRODUCT_PACKAGES += \
    ViPER4Android
 
 # Gello
-PRODUCT_PACKAGES +=
+PRODUCT_PACKAGES += \
    Gello
 
 ## Device identifier. This must come after all inclusions
