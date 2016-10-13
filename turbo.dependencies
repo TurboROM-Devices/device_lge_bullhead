@@ -7,8 +7,8 @@
   },
   {
     "remote": "github",
-    "repository": "Joshndroid/android_vendor_lge_bullhead",
+    "repository": "Tempertet/vendor_lge_bullhead",
     "target_path": "vendor/lge/bullhead",
-    "branch": "nougat"
+    "branch": "n"
   }
 ]
